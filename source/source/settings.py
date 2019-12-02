@@ -19,14 +19,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
-DEBUG = int(os.environ.get("DEBUG", default=0))
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+# SECRET_KEY = os.environ.get("SECRET_KEY")
+# DEBUG = int(os.environ.get("DEBUG", default=0))
+# ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
-# DEBUG=1
-# SECRET_KEY="_jzf8*++m#5$elalw4&6ih7xcd+fkg4#$6rdnz9emrd*)lp@ft"
-# ALLOWED_HOSTS = ['*']
-# Application definition
+DEBUG=1
+SECRET_KEY="_jzf8*++m#5$elalw4&6ih7xcd+fkg4#$6rdnz9emrd*)lp@ft"
+ALLOWED_HOSTS = ['*']
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django_elasticsearch_dsl',
     'django_elasticsearch_dsl_drf',
     "app",
+    "taskapp",
 ]
 
 MIDDLEWARE = [
@@ -184,3 +185,8 @@ MEDIA_URL = "/mediafiles/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 
 
+CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_RESULT_BACKEND = 'amqp://localhost'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

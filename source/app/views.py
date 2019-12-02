@@ -7,7 +7,7 @@ def test(request):
 
 
 class index3Page(generic.TemplateView):
-    template_name = "dash/AdminLTE/index3.html"
+    template_name = "dash/AdminLTE/index.html"
 
 
 class indexPage(generic.TemplateView):
@@ -19,7 +19,7 @@ class starterPage(generic.TemplateView):
 
 
 class index2Page(generic.TemplateView):
-    template_name = "dash/AdminLTE/index2.html"
+    template_name = "dash/AdminLTE/index.html"
 
 
 class code_404Page(generic.TemplateView):
