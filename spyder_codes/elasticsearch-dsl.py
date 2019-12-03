@@ -9,7 +9,7 @@ from datetime import datetime
 from elasticsearch_dsl import Document, Date, Integer, Keyword, Text, Float, Boolean,GeoPoint,connections
 from tabulate import tabulate
 # Define a default Elasticsearch client
-connections.create_connection(hosts=['localhost'])
+connections.create_connection(hosts=['0.0.0.0'])
 
 
 
@@ -76,7 +76,7 @@ class Main:
         BatteryObj.save(**{'index':'battery','id':1})
         del BatteryObj
 
-#df = Query().get('test0',10000)
+df = Query().get('battery',10000)
 #q = BatteryModel.get(_id=1)
 
 

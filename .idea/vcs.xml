@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/js2django" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/source/docker-airflow" vcs="Git" />
   </component>
 </project>
