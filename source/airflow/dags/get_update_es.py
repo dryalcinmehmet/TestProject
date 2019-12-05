@@ -4,56 +4,17 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.postgres_operator import PostgresOperator
 from airflow.hooks.postgres_hook import PostgresHook
 from psycopg2.extras import execute_values
-import pandas as pd
-import sqlalchemy as sql
 import os
 import sys
-from datetime import datetime
+
 from elasticsearch import Elasticsearch
-es = Elasticsearch()
-from pandasticsearch import Select
-import pandas as pd
-from elasticsearch import Elasticsearch
-from espandas import Espandas
+es = Elasticsearch(['192.168.88.187'])
 from datetime import datetime
 from elasticsearch_dsl import Document, Date, Integer, Keyword, Text, Float, Boolean,GeoPoint,connections
 from tabulate import tabulate
-
 sys.path.append(os.getcwd())
 
 
-class BatteryModel(Document):
-    ActivePower = Float()
-    Temperature = Float()
-    Humidity = Float()
-    Weekdays = Integer()
-    Vacays = Boolean()
-    Location = GeoPoint()
-    Date = Date()
-    Place = Text(analyzer='standard', fields={'raw': Keyword()})
-
-    class Index:
-        name = 'default'
-        settings = {
-            "number_of_shards": 2,
-        }
-
-    def save(self, **kwargs):
-        return super(BatteryModel, self).save(**kwargs)
-
-    def SetValues(self, *args, **kwargs):
-        self.ActivePower = args[0]
-        self.Temperature = args[1]
-        self.Humidity = args[2]
-        self.Weekdays = args[3]
-        self.Vacays = args[4]
-        self.Location = args[5]
-        self.Place = args[6]
-        self.Date = args[7]
-
-    def GetValues(self):
-        print(self.ActivePower, self.Temperature, self.Humidity, self.Weekdays, self.Vacays, self.Location, self.Date,
-              self.Place)
 
 class Query:
     def __init___(self,*args, ** kwargs):
@@ -66,54 +27,56 @@ class Query:
 
 
 
-class Main:
-    default_args = {
-        'owner': 'airflow',
-        'depends_on_past': False,
-        'start_date': datetime(2018, 4, 15),
-        'email': ['example@email.com'],
-        'email_on_failure': False,
-        'email_on_retry': False,
-        'retries': 1,
-        'retry_delay': timedelta(minutes=5),
-        'catchup': False
-    }
+def connect():
+    connections.create_connection(hosts=['192.168.88.187'])
 
-    def __init__(self):
-        self.host = "0.0.0.0"
-        self.dag = DAG('get_update_es',
-                  default_args=self.default_args,
+def get():
+    df_es = Query().get('test', 10000)
+    df_es = df_es.sort_values('Date_Time', ascending=True)
+
+    last_date_es = [i for i in df_es[-1::]['Date_Time']][0]
+    last_index_es = [i for i in df_es[-1::]['_id']][0]
+    from airflow.models.taskinstance import task_instance
+
+    task_instance.xcom_push(key='last_date_es', value=last_date_es)
+    task_instance.xcom_push(key='last_index_es', value=last_index_es)
+
+
+
+
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'start_date': datetime(2018, 4, 15),
+    'email': ['example@email.com'],
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 1,
+    'retry_delay': timedelta(minutes=5),
+    'catchup': False
+}
+
+
+dag = DAG('get_update_es',
+                  default_args=default_args,
                   schedule_interval='@once',
                   start_date=datetime(2017, 3, 20),
                   catchup=False)
-        self.last_date_es = ''
 
 
 
-        self.task1 = PythonOperator(task_id='connect_es',
-                               provide_context=False,
-                               python_callable=self.connect(),
-                               dag=self.dag)
+task1 = PythonOperator(task_id='connect_es',
+                       provide_context=False,
+                       python_callable=connect,
+                       dag=dag)
 
-        self.task2 = PythonOperator(task_id='get_es',
-                               provide_context=False,
-                               python_callable=self.get(),
-                               dag=self.dag)
+task2 = PythonOperator(task_id='get_es',
+                       provide_context=False,
+                       python_callable=get,
+                       dag=dag)
 
-        self.task1 >> self.task2
+task1 >> task2
 
-
-
-    def connect(self):
-        connections.create_connection(hosts=[self.host])
-
-    def get(self,**kwargs):
-        last_date_es = Query().get('test',10).sort_values(by=['indexId'])[-1::]['indexId'][0]
-        last_index_es = Query().get('test',10).sort_values(by=['indexId'])[-1::]['_id'][0]
-        task_instance = kwargs['task_instance']
-        task_instance.xcom_push(key='last_date_es', value=last_date_es)
-        task_instance.xcom_push(key='last_index_es', value=last_index_es)
-        self.last_date_es = task_instance.xcom_pull(task_ids='get_es', key='last_date_es')
 
 
 

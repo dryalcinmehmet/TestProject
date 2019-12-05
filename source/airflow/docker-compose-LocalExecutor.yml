@@ -1,7 +1,7 @@
 version: '2.1'
 services:
     postgres:
-        image: postgres:12.0-alpine
+        image: postgres:9.6
         environment:
             - POSTGRES_USER=airflow
             - POSTGRES_PASSWORD=airflow
@@ -9,6 +9,9 @@ services:
     webserver:
         image: puckel/docker-airflow:1.10.6
         restart: always
+        build:
+            context: .
+            dockerfile: Dockerfile
         depends_on:
             - postgres
         environment:

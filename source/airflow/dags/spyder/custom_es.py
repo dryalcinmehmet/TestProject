@@ -76,9 +76,8 @@ class Main:
         BatteryObj.save(**{'index':'battery','id':1})
         del BatteryObj
 
-df = Query().get('battery',10000)
+#df = Query().get('battery',10000)
 #q = BatteryModel.get(_id=1)
-
 
 
 
